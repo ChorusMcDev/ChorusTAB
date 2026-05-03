@@ -25,6 +25,12 @@ public class BukkitTAB extends JavaPlugin {
             Bukkit.getConsoleSender().sendMessage("§c[TAB] If you are using an unsupported 1.x version, use an older version of TAB (latest TAB 5.x supports all MC 1.x versions).");
             Bukkit.getConsoleSender().sendMessage("§c[TAB] Thrown error message: " + e.getMessage());
             Bukkit.getConsoleSender().sendMessage("§c[TAB] ================================================================================");
+        } catch (Throwable e) {
+            Bukkit.getConsoleSender().sendMessage("§c[TAB] ================================================================================");
+            Bukkit.getConsoleSender().sendMessage("§c[TAB] Failed to enable the plugin due to an unexpected error:");
+            Bukkit.getConsoleSender().sendMessage("§c[TAB] " + e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
+            Bukkit.getConsoleSender().sendMessage("§c[TAB] ================================================================================");
         }
     }
 

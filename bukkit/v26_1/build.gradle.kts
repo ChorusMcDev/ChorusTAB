@@ -4,5 +4,5 @@ dependencies {
 }
 
 tasks.compileJava {
-    options.release.set(21) // Included library "jtracy" requires Java 21
+    options.release.set(25) // Spigot 26.1 requires Java 25
 }

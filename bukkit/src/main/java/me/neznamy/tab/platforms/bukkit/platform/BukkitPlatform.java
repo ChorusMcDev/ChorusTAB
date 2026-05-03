@@ -113,7 +113,14 @@ public class BukkitPlatform implements BackendPlatform {
         if (Bukkit.getPluginManager().isPluginEnabled("PremiumVanish")) {
             new BukkitPremiumVanishHook().register();
         }
-        commandMap = (SimpleCommandMap) Bukkit.getServer().getClass().getMethod("getCommandMap").invoke(Bukkit.getServer());
+        SimpleCommandMap cmdMap;
+        try {
+            cmdMap = (SimpleCommandMap) Bukkit.getServer().getClass().getMethod("getCommandMap").invoke(Bukkit.getServer());
+        } catch (ReflectiveOperationException e) {
+            // Fallback: try Bukkit.getCommandMap() directly (available in newer API)
+            cmdMap = (SimpleCommandMap) Bukkit.getCommandMap();
+        }
+        commandMap = cmdMap;
         knownCommands = (Map<String, Command>) ReflectionUtils.getField(SimpleCommandMap.class, "knownCommands").get(commandMap);
     }
 

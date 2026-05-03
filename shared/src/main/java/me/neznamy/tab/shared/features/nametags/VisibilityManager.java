@@ -101,12 +101,7 @@ public class VisibilityManager extends RefreshableFeature implements JoinListene
      */
     public void updateVisibility(@NonNull TabPlayer player) {
         for (TabPlayer viewer : nameTags.getOnlinePlayers().getPlayers()) {
-            if (viewer.teamData.hasTeamRegistered(player)) {
-                viewer.getScoreboard().updateTeam(
-                        player.teamData.teamName,
-                        player.teamData.getTeamVisibility(viewer) ? Scoreboard.NameVisibility.ALWAYS : Scoreboard.NameVisibility.NEVER
-                );
-            }
+            updateVisibility(player, viewer);
         }
         nameTags.getProxyHandler().sendProxyMessage(player);
     }
@@ -121,10 +116,23 @@ public class VisibilityManager extends RefreshableFeature implements JoinListene
      */
     public void updateVisibility(@NonNull TabPlayer player, @NonNull TabPlayer viewer) {
         if (viewer.teamData.hasTeamRegistered(player)) {
-            viewer.getScoreboard().updateTeam(
-                    player.teamData.teamName,
-                    player.teamData.getTeamVisibility(viewer) ? Scoreboard.NameVisibility.ALWAYS : Scoreboard.NameVisibility.NEVER
-            );
+            boolean visible = player.teamData.getTeamVisibility(viewer);
+
+            if (nameTags.getBackgroundManager() != null) {
+                // When background manager is active, vanilla nametag is always NEVER.
+                // We control visibility via Text Display entity instead.
+                if (visible) {
+                    nameTags.getBackgroundManager().updateDisplay(player, viewer,
+                            nameTags.buildNameTagText(player, viewer));
+                } else {
+                    nameTags.getBackgroundManager().destroyDisplay(player, viewer);
+                }
+            } else {
+                viewer.getScoreboard().updateTeam(
+                        player.teamData.teamName,
+                        visible ? Scoreboard.NameVisibility.ALWAYS : Scoreboard.NameVisibility.NEVER
+                );
+            }
         }
     }
 

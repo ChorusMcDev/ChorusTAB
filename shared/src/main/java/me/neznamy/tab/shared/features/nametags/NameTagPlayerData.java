@@ -33,6 +33,14 @@ public class NameTagPlayerData {
     /** Player's tagsuffix */
     public Property suffix;
 
+    /** Lines displayed ABOVE the main nametag line (prefix+name+suffix). Supports placeholders. */
+    @NotNull
+    public List<Property> aboveLines = new ArrayList<>();
+
+    /** Lines displayed BELOW the main nametag line (prefix+name+suffix). Supports placeholders. */
+    @NotNull
+    public List<Property> belowLines = new ArrayList<>();
+
     /** Flag tracking whether this feature is disabled for the player with condition or not */
     public final AtomicBoolean disabled = new AtomicBoolean();
 

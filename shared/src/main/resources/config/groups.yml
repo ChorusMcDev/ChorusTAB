@@ -1,6 +1,8 @@
 #Owner:
 #  tabprefix: "&0&l[&a&lOwner&0&l] &a"
 #  tagprefix: "&2&lOwner &a"
+#  above-line-0: "&6★ Owner ★"
+#  below-line-0: "&7Online since %player_first_join_date%"
 Player:
   tabprefix: "&0&l[&7&lPlayer&0&l] &3"
   tagprefix: "&2&lPlayer &3"

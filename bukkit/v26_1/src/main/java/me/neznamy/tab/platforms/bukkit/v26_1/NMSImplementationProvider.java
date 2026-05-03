@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import me.neznamy.tab.platforms.bukkit.BukkitTabPlayer;
 import me.neznamy.tab.platforms.bukkit.provider.ComponentConverter;
 import me.neznamy.tab.platforms.bukkit.provider.ImplementationProvider;
+import me.neznamy.tab.platforms.bukkit.provider.NameTagBackgroundHandler;
 import me.neznamy.tab.shared.platform.Scoreboard;
 import me.neznamy.tab.shared.platform.TabList;
 import me.neznamy.tab.shared.platform.TabListEntryTracker;
@@ -29,7 +30,10 @@ public class NMSImplementationProvider implements ImplementationProvider {
 
     @NotNull
     private final ComponentConverter<?> componentConverter = new NMSComponentConverter();
-    
+
+    @NotNull
+    private final NameTagBackgroundHandler nameTagBackgroundHandler = new NMSNameTagBackgroundHandler();
+
     @Override
     @NotNull
     public Scoreboard newScoreboard(@NotNull BukkitTabPlayer player) {
@@ -58,5 +62,11 @@ public class NMSImplementationProvider implements ImplementationProvider {
     @Override
     public int getPing(@NotNull BukkitTabPlayer player) {
         return player.getPlayer().getPing();
+    }
+
+    @Override
+    @NotNull
+    public NameTagBackgroundHandler getNameTagBackgroundHandler() {
+        return nameTagBackgroundHandler;
     }
 }

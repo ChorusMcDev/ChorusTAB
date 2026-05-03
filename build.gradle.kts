@@ -4,10 +4,10 @@ plugins {
 
 allprojects {
     group = "me.neznamy"
-    version = "6.0.3-SNAPSHOT"
+    version = "1.1"
     description = "An all-in-one solution that works"
 
-    ext.set("id", "tab")
+    ext.set("id", "chorustab")
     ext.set("website", "https://github.com/NEZNAMY/TAB")
     ext.set("author", "NEZNAMY")
     ext.set("credits", "Joseph T. McQuigg (JT122406)")

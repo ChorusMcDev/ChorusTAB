@@ -34,6 +34,10 @@ scoreboard-teams:
   enabled: true
   enable-collision: true
   invisible-nametags: false
+  hide-nametag-background: false
+  nametag-y-offset: 0.0
+  above-lines: []
+  below-lines: []
   # https://github.com/NEZNAMY/TAB/wiki/Feature-guide:-Sorting-players-in-tablist
   sorting-types:
     - "GROUPS:owner,admin,mod,helper,builder,vip,default"

@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
+
 /**
  * An interface to provide platform-specific implementations of various features in various Minecraft versions.
  */
@@ -70,4 +72,15 @@ public interface ImplementationProvider {
      * @return  Player's ping
      */
     int getPing(@NotNull BukkitTabPlayer player);
+
+    /**
+     * Returns the nametag background handler for spawning Text Display entities
+     * with transparent backgrounds, or {@code null} if not supported by this version.
+     *
+     * @return  Nametag background handler or null
+     */
+    @Nullable
+    default NameTagBackgroundHandler getNameTagBackgroundHandler() {
+        return null;
+    }
 }

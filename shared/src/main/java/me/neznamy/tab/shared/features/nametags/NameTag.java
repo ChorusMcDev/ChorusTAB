@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class NameTag extends TabFeature implements NameTagManager, JoinListener, QuitListener,
-        Loadable, VanishListener, ServerSwitchListener, CustomThreaded, ProxyFeature, Dumpable {
+        Loadable, UnLoadable, VanishListener, ServerSwitchListener, CustomThreaded, ProxyFeature, Dumpable {
 
     private final ThreadExecutor customThread = new ThreadExecutor("TAB NameTag Thread");
     private OnlinePlayers onlinePlayers;
@@ -43,6 +43,10 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
     @Nullable private final ProxySupport proxy = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.PROXY_SUPPORT);
     private final NameTagProxyHandler proxyHandler = new NameTagProxyHandler(this);
     private final PrefixSuffixManager prefixSuffixManager = new PrefixSuffixManager(this);
+
+    // Nametag background (Text Display) support
+    private final StringToComponentCache nameTagTextCache = new StringToComponentCache("NameTag display text", 1000);
+    @Nullable @Getter private final NameTagBackgroundManager backgroundManager;
 
     /**
      * Constructs new instance and registers sub-features.
@@ -59,6 +63,13 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
         TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.NAME_TAGS + "-Condition", disableChecker);
         if (proxy != null) {
             proxy.registerMessage(NameTagProxyPlayerData.class, in -> new NameTagProxyPlayerData(in, this));
+        }
+
+        // Initialize background manager if configured
+        if (configuration.isHideNameTagBackground()) {
+            backgroundManager = new NameTagBackgroundManager(this, configuration.getNameTagYOffset());
+        } else {
+            backgroundManager = null;
         }
     }
 
@@ -88,6 +99,24 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
         }
         visibilityManager.load();
         collisionManager.load();
+    }
+
+    @Override
+    public void unload() {
+        // Destroy all Text Display entities on unload/reload to prevent ghost entities
+        if (backgroundManager != null) {
+            List<TabPlayer> players = Arrays.asList(onlinePlayers.getPlayers());
+            for (TabPlayer target : players) {
+                backgroundManager.destroyAllDisplays(target, players);
+            }
+        }
+        for (TabPlayer viewer : onlinePlayers.getPlayers()) {
+            for (TabPlayer target : onlinePlayers.getPlayers()) {
+                if (!target.teamData.isDisabled()) {
+                    viewer.getScoreboard().unregisterTeam(target.teamData.teamName);
+                }
+            }
+        }
     }
 
     @Override
@@ -143,6 +172,11 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
     public void onQuit(@NotNull TabPlayer disconnectedPlayer) {
         onlinePlayers.removePlayer(disconnectedPlayer);
         unregisterTeam(disconnectedPlayer);
+        // Clean up display entities for the disconnected player
+        if (backgroundManager != null) {
+            backgroundManager.destroyAllDisplays(disconnectedPlayer, Arrays.asList(onlinePlayers.getPlayers()));
+            backgroundManager.onViewerQuit(disconnectedPlayer);
+        }
     }
 
     @Override
@@ -240,17 +274,30 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
 
     private void registerTeam(@NonNull TabPlayer p, @NonNull TabPlayer viewer) {
         if (shouldRegister(p, viewer)) {
+            boolean nametagVisible = p.teamData.getTeamVisibility(viewer);
+
             viewer.teamData.registerTeam(
                     p,
                     p.teamData.teamName,
                     prefixCache.get(p.teamData.prefix.getFormat(viewer)),
                     suffixCache.get(p.teamData.suffix.getFormat(viewer)),
-                    p.teamData.getTeamVisibility(viewer) ? NameVisibility.ALWAYS : NameVisibility.NEVER,
+                    // When background hiding is active, always hide the vanilla nametag
+                    (backgroundManager != null) ? NameVisibility.NEVER :
+                        (nametagVisible ? NameVisibility.ALWAYS : NameVisibility.NEVER),
                     p.teamData.getCollisionRule() ? CollisionRule.ALWAYS : CollisionRule.NEVER,
                     Collections.singletonList(p.getNickname()),
                     teamOptions,
                     lastColorCache.get(p.teamData.prefix.getFormat(viewer)).getLastStyle().toEnumChatFormat()
             );
+
+            // Spawn or destroy the Text Display based on visibility
+            if (backgroundManager != null) {
+                if (nametagVisible) {
+                    backgroundManager.spawnDisplay(p, viewer, buildNameTagText(p, viewer));
+                } else {
+                    backgroundManager.destroyDisplay(p, viewer);
+                }
+            }
         }
     }
 
@@ -259,6 +306,55 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
         if (teamOwner.teamData.vanishedFor.contains(viewer.getUniqueId())) return false;
         if (!viewer.canSee(teamOwner) && teamOwner != viewer) return false;
         return viewer.server.canSee(teamOwner.server);
+    }
+
+    /**
+     * Builds the full multi-line nametag text for a target player as seen by a viewer.
+     * Joins above lines, main line (prefix+name+suffix), and below lines with \n.
+     * Empty lines after placeholder resolution are skipped.
+     *
+     * @param target The player whose nametag to build
+     * @param viewer The player viewing the nametag
+     * @return Complete multi-line nametag text
+     */
+    @NotNull
+    public String buildNameTagText(@NotNull TabPlayer target, @NotNull TabPlayer viewer) {
+        StringBuilder sb = new StringBuilder();
+
+        // Above lines (top to bottom)
+        for (Property line : target.teamData.aboveLines) {
+            String resolved = line.getFormat(viewer);
+            if (!resolved.isEmpty()) {
+                if (sb.length() > 0) sb.append('\n');
+                sb.append(resolved);
+            }
+        }
+
+        // Main line: prefix + name + suffix
+        String mainLine = target.teamData.prefix.getFormat(viewer) + target.getNickname() + target.teamData.suffix.getFormat(viewer);
+        if (sb.length() > 0) sb.append('\n');
+        sb.append(mainLine);
+
+        // Below lines (top to bottom)
+        for (Property line : target.teamData.belowLines) {
+            String resolved = line.getFormat(viewer);
+            if (!resolved.isEmpty()) {
+                sb.append('\n');
+                sb.append(resolved);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns the cache for converting nametag text strings to components.
+     *
+     * @return Nametag text cache
+     */
+    @NotNull
+    public StringToComponentCache getNameTagTextCache() {
+        return nameTagTextCache;
     }
 
     /**

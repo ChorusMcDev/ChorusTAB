@@ -1,5 +1,5 @@
 main: me.neznamy.tab.platforms.bukkit.BukkitTAB
-name: @name@
+name: ChorusTAB
 version: @version@
 description: @description@
 api-version: 1.13 # Defining to avoid legacy plugin warn
