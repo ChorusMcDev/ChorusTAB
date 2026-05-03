@@ -109,11 +109,19 @@ public class NMSNameTagBackgroundHandler implements NameTagBackgroundHandler {
     /** Vertical offset in blocks */
     private float yOffset = 0.0f;
 
+    /** Whether to render text through translucent blocks */
+    private boolean seeThrough = true;
+
     // ──────────────── Public API ────────────────
 
     @Override
     public void setYOffset(float offset) {
         this.yOffset = offset;
+    }
+
+    @Override
+    public void setSeeThrough(boolean seeThrough) {
+        this.seeThrough = seeThrough;
     }
 
     @Override
@@ -241,8 +249,8 @@ public class NMSNameTagBackgroundHandler implements NameTagBackgroundHandler {
         // Text opacity: fully opaque text
         metadata.add(SynchedEntityData.DataValue.create(TEXT_OPACITY, (byte) -1));
 
-        // Flags: SEE_THROUGH, CENTER alignment
-        metadata.add(SynchedEntityData.DataValue.create(STYLE_FLAGS, TEXT_DISPLAY_FLAGS));
+        // Flags: SEE_THROUGH (if enabled), CENTER alignment
+        metadata.add(SynchedEntityData.DataValue.create(STYLE_FLAGS, seeThrough ? TEXT_DISPLAY_FLAGS : (byte) 0x00));
 
         return metadata;
     }

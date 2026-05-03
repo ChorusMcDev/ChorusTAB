@@ -23,6 +23,8 @@ public class TeamConfiguration {
     @NotNull private final String disableCondition;
     /** Whether to hide the semi-transparent background behind nametags using Text Display entities */
     private final boolean hideNameTagBackground;
+    /** Whether the nametag text should render through translucent blocks (water, clouds, etc.) */
+    private final boolean nametagSeeThrough;
     /** Vertical offset (in blocks) for the nametag Text Display entity */
     private final float nameTagYOffset;
     /** Lines displayed above the main nametag line (prefix+name+suffix). Supports placeholders. */
@@ -43,7 +45,7 @@ public class TeamConfiguration {
         // Check keys
         section.checkForUnknownKey(Arrays.asList("enabled", "enable-collision", "invisible-nametags", "sorting-types",
                 "case-sensitive-sorting", "can-see-friendly-invisibles", "disable-condition",
-                "hide-nametag-background", "nametag-y-offset", "above-lines", "below-lines"));
+                "hide-nametag-background", "nametag-see-through", "nametag-y-offset", "above-lines", "below-lines"));
 
         return new TeamConfiguration(
                 section,
@@ -52,6 +54,7 @@ public class TeamConfiguration {
                 section.getBoolean("can-see-friendly-invisibles", false),
                 section.getString("disable-condition", "%world%=disabledworld"),
                 section.getBoolean("hide-nametag-background", false),
+                section.getBoolean("nametag-see-through", true),
                 ((Number) section.getObject("nametag-y-offset", 0.0)).floatValue(),
                 section.getStringList("above-lines", Collections.emptyList()),
                 section.getStringList("below-lines", Collections.emptyList())

@@ -23,6 +23,9 @@ public class NameTagBackgroundManager {
     /** Vertical offset configured */
     private final float yOffset;
 
+    /** Whether text should render through translucent blocks */
+    private final boolean seeThrough;
+
     /**
      * Spawns a Text Display above the target's head, visible to the viewer.
      *
@@ -34,6 +37,7 @@ public class NameTagBackgroundManager {
         Object handler = getHandler(viewer);
         if (handler == null) return;
         applyYOffset(handler);
+        applySeeThrough(handler);
         TabComponent component = nameTags.getNameTagTextCache().get(text);
         invokeSpawn(handler, target, viewer, component);
     }
@@ -149,6 +153,13 @@ public class NameTagBackgroundManager {
         try {
             handler.getClass().getMethod("setYOffset", float.class)
                     .invoke(handler, yOffset);
+        } catch (Exception ignored) {}
+    }
+
+    private void applySeeThrough(Object handler) {
+        try {
+            handler.getClass().getMethod("setSeeThrough", boolean.class)
+                    .invoke(handler, seeThrough);
         } catch (Exception ignored) {}
     }
 }

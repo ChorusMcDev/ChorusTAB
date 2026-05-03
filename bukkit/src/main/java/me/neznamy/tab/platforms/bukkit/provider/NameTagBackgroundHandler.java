@@ -18,6 +18,13 @@ public interface NameTagBackgroundHandler {
     void setYOffset(float offset);
 
     /**
+     * Sets whether the nametag text should render through translucent blocks (water, clouds).
+     *
+     * @param seeThrough true to render through blocks
+     */
+    void setSeeThrough(boolean seeThrough);
+
+    /**
      * Spawns a Text Display entity above the target player's head,
      * visible only to the specified viewer.
      *

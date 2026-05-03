@@ -67,7 +67,7 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
 
         // Initialize background manager if configured
         if (configuration.isHideNameTagBackground()) {
-            backgroundManager = new NameTagBackgroundManager(this, configuration.getNameTagYOffset());
+            backgroundManager = new NameTagBackgroundManager(this, configuration.getNameTagYOffset(), configuration.isNametagSeeThrough());
         } else {
             backgroundManager = null;
         }

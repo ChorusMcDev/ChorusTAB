@@ -35,6 +35,7 @@ scoreboard-teams:
   enable-collision: true
   invisible-nametags: false
   hide-nametag-background: false
+  nametag-see-through: true
   nametag-y-offset: 0.0
   above-lines: []
   below-lines: []
